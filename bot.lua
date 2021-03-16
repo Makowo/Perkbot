@@ -8,6 +8,7 @@ local json = require("json")
 local clock = discordia.Clock()
 local decode
 local Names = {}
+local nameslower = {}
 local elo = {}
 local mplayed = {}
 local winloss = {}
@@ -53,12 +54,20 @@ function GetSpreadsheet()
         decode = json.decode(body)
         --print(body)
         --print(decode.values[1][1])
+        Names = {}
+        nameslower = {}
+        elo = {}
+        mplayed = {}
+        winloss = {}
         for _, v in ipairs(decode.values) do
             --print(v[k])
             table.insert(Names, v[1])
             table.insert(elo, v[3])
             table.insert(mplayed, v[4])
             table.insert(winloss, v[31])
+        end
+        for k,v in pairs(Names) do
+            nameslower[k] = v:lower()
         end
         --tprint(Names)
         --tprint(elo)
@@ -71,7 +80,7 @@ function SendElo(message)
     GetSpreadsheet()
     if decode ~= nil then
         if message.author.id == "553931341402472464" or "109199911441965056" then
-            for k, v in ipairs(decode.values) do
+            for k, _ in ipairs(decode.values) do
                 --print(v[k])
                 local send =  "Elo: ".. elo[k] .."\nMatches Played: ".. mplayed[k] .. "\nW/L: " ..winloss[k]
                 message.channel:send{
@@ -89,8 +98,8 @@ function CheckElo(message, args)
     GetSpreadsheet()
     if decode ~= nil then
         if args ~= nil then
-            if table.find(Names, args[2]) then
-                local k = get_key_for_value(Names, args[2])
+            if table.find(nameslower, args[2]:lower()) then
+                local k = get_key_for_value(nameslower, args[2])
                 print("found!")
                 local send =  "Elo: ".. elo[k] .."\nMatches Played: ".. mplayed[k] .. "\nW/L: " ..winloss[k]
                 message.channel:send{
