@@ -1,4 +1,4 @@
-# Elobot
+# Perkbot
 small discord bot for attack on quest league's elo
 
 # Usage
