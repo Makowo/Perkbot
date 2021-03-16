@@ -99,7 +99,7 @@ function CheckElo(message, args)
     if decode ~= nil then
         if args ~= nil then
             if table.find(nameslower, args[2]:lower()) then
-                local k = get_key_for_value(nameslower, args[2])
+                local k = get_key_for_value(nameslower, args[2]:lower())
                 print("found!")
                 local send =  "Elo: ".. elo[k] .."\nMatches Played: ".. mplayed[k] .. "\nW/L: " ..winloss[k]
                 message.channel:send{
