@@ -5,15 +5,26 @@ local settings = require("settings")
 local client = discordia.Client()
 local http = require("coro-http")
 local json = require("json")
+local clock = discordia.Clock()
 local decode
 local Names = {}
 local elo = {}
 local mplayed = {}
 local winloss = {}
+local GameOptions = {"Adding Titan Shifting", "Messing with perk's math","Attack On Quest"}
+
+local function setGame()
+	client:setGame(GameOptions[math.random(#GameOptions)])
+end
+
+clock:on("min", function()
+	setGame()
+end)
 
 client:on('ready', function()
 	print('Logged in as '.. client.user.username)
     GetSpreadsheet()
+    setGame()
 end)
 
 client:on('messageCreate', function(message)
@@ -28,7 +39,7 @@ client:on('messageCreate', function(message)
         else
             message.channel:send("You do not have permission to use this command.")
         end
-    elseif args[1] == '!checkelo' then
+    elseif args[1] == '!elo' then
 		local reply = message.channel:send('Checking Elo!')
         --message:delete()
         CheckElo(message, args)
@@ -45,9 +56,9 @@ function GetSpreadsheet()
         for _, v in ipairs(decode.values) do
             --print(v[k])
             table.insert(Names, v[1])
-            table.insert(elo, v[2])
-            table.insert(mplayed, v[3])
-            table.insert(winloss, v[4])
+            table.insert(elo, v[3])
+            table.insert(mplayed, v[4])
+            table.insert(winloss, v[31])
         end
         --tprint(Names)
         --tprint(elo)
@@ -61,9 +72,14 @@ function SendElo(message)
     if decode ~= nil then
         if message.author.id == "553931341402472464" or "109199911441965056" then
             for k, v in ipairs(decode.values) do
-                print(v[k])
-                local send = "**"..v[1].."**" .. ": ".. v[2] .."\n**Matches Played**: ".. v[3] .. "\n**W/L**: " ..v[4]
-                message.channel:send(send)
+                --print(v[k])
+                local send =  "Elo: ".. elo[k] .."\nMatches Played: ".. mplayed[k] .. "\nW/L: " ..winloss[k]
+                message.channel:send{
+                    embed={
+                        fields = {
+                            {name = Names[k], value = send },
+                        }
+                    }}
             end
         end
     end
@@ -76,11 +92,18 @@ function CheckElo(message, args)
             if table.find(Names, args[2]) then
                 local k = get_key_for_value(Names, args[2])
                 print("found!")
-                local send = "**"..Names[k].."**" .. ": ".. elo[k] .."\n**Matches Played**: ".. mplayed[k] .. "\n**W/L**: " ..winloss[k]
-                message.channel:send(send)
+                local send =  "Elo: ".. elo[k] .."\nMatches Played: ".. mplayed[k] .. "\nW/L: " ..winloss[k]
+                message.channel:send{
+                    embed={
+                        fields = {
+                            {name = Names[k], value = send },
+                        }
+                    }}
+            else
+                message.channel:send("Name not found! Likely need caps.")
             end
         end
     end
 end
-
+clock:start()
 client:run('Bot '.. settings.token)
