@@ -6,6 +6,7 @@ local client = discordia.Client()
 local http = require("coro-http")
 local json = require("json")
 local clock = discordia.Clock()
+local timer = 0
 local decode
 local Names = {}
 local nameslower = {}
@@ -13,14 +14,19 @@ local elo = {}
 local mplayed = {}
 local winloss = {}
 local UID = {}
-local GameOptions = {"Adding Titan Shifting", "Messing with perk's math", "Attack On Quest", "Bullying Ewan"}
-
+local GameOptions = {"Adding titan shifting", "Messing with perk's math", "Attack On Quest", "Bullying Ewan", "Practicing chop skims", "Crying in a corner", "Trashing Timmys", "Watching Quest Taker", "Watching Calactic", "Super jumping", "Searching for fuel in Shiganshina", "Taking a water break", "Summoning boss titans in 1v1s", "Unlocking the lobby in a 1v1", "On US server", "Hanging out with Perk", "🅱️erk", "Killing Jim’s lackies", "Requesting titan shifting", "Requesting colossal titan", "Requesting PVP", "Arguing with Dyno", "Having an existential crisis", "Breaking Mako’s code", "Error 404 message not found", "!Perkhelp", "Losing my small amount of remaining sanity", "Listening to hopes and dreams by Toby Fox", "Help help get me out", "I’m not a bot please I’m trapped", "I’m being held here against my will", "Doing Perk’s math homework", "Don’t dm me for modmail", "Waiting for my next update"}
 local function setGame()
 	client:setGame(GameOptions[math.random(#GameOptions)])
+    local guild = client:getGuild("808112859372060672")
+    guild.me:setNickname(nil)
 end
 
 clock:on("min", function()
-	setGame()
+    timer = timer + 1
+    if timer == 10 then
+        timer = 0
+        setGame()
+    end
 end)
 
 client:on('ready', function()
@@ -30,10 +36,11 @@ client:on('ready', function()
 end)
 
 client:on('messageCreate', function(message)
-	local args = message.content:split(" ")
+	local content = message.content:lower()
+	local args = content:split(" ")
     if not message.author.bot then
         if args[1] == '!updateelo' then
-            if message.author.id == "553931341402472464" then
+            if message.author.id == "553931341402472464" or "109199911441965056" then
                 local reply = message:reply('Updating Elo!')
                 SendElo(message)
                 reply:delete()
@@ -47,7 +54,12 @@ client:on('messageCreate', function(message)
         elseif args[1] == '!bracket' then
             CheckLeaderboard(message)
         elseif table.find(args, "cringebot") or table.find(args, "Cringebot") then
-            message:reply("no, you're cringe, " .. message.author.username)
+            message:reply("no, you're cringe " .. message.author.username)
+        elseif args[1] == '!perkhelp' then
+            local reply = "!elo: Checks the User's elo and IGN \n!elo [IGN]: Checks the elo and stats of the IGN included \n!bracket: Displays a list of the top 16 qualified people for the finals"
+            message:reply{embed={description = reply}}
+        elseif args[1] == '!marryme' then
+            message.channel:send("B-Baka... It's not like I l-like you or anything...")
         end
     end
 end)
