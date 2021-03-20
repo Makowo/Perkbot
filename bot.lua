@@ -40,15 +40,7 @@ client:on('messageCreate', function(message)
 	local args = content:split(" ")
     if not message.author.bot then
         if message.channel.id == "821235548672884756" then
-            if args[1] == '!updateelo' then
-                if message.author.id == "553931341402472464" or "109199911441965056" then
-                    local reply = message:reply('Updating Elo!')
-                    SendElo(message)
-                    reply:delete()
-                else
-                    message.channel:send("You do not have permission to use this command.")
-                end
-            elseif args[1] == '!elo' then
+            if args[1] == '!elo' then
                 local reply = message.channel:send('Checking Elo!')
                 CheckElo(message, args)
                 reply:delete()
@@ -61,6 +53,16 @@ client:on('messageCreate', function(message)
                 message:reply{embed={description = reply}}
             elseif args[1] == '!marryme' then
                 message.channel:send("B-Baka... It's not like I l-like you or anything...")
+            end
+        elseif message.channel.id == "814918813346168893" then
+            if args[1] == '!updateelo' then
+                if message.author.id == "553931341402472464" or "109199911441965056" then
+                    local reply = message:reply('Updating Elo!')
+                    SendElo(message)
+                    reply:delete()
+                else
+                    message.channel:send("You do not have permission to use this command.")
+                end
             end
         end
     end
