@@ -39,27 +39,29 @@ client:on('messageCreate', function(message)
 	local content = message.content:lower()
 	local args = content:split(" ")
     if not message.author.bot then
-        if args[1] == '!updateelo' then
-            if message.author.id == "553931341402472464" or "109199911441965056" then
-                local reply = message:reply('Updating Elo!')
-                SendElo(message)
+        if message.channel.id == "821235548672884756" then
+            if args[1] == '!updateelo' then
+                if message.author.id == "553931341402472464" or "109199911441965056" then
+                    local reply = message:reply('Updating Elo!')
+                    SendElo(message)
+                    reply:delete()
+                else
+                    message.channel:send("You do not have permission to use this command.")
+                end
+            elseif args[1] == '!elo' then
+                local reply = message.channel:send('Checking Elo!')
+                CheckElo(message, args)
                 reply:delete()
-            else
-                message.channel:send("You do not have permission to use this command.")
+            elseif args[1] == '!bracket' then
+                CheckLeaderboard(message)
+            elseif table.find(args, "cringebot") or table.find(args, "Cringebot") then
+                message:reply("no, you're cringe " .. message.author.username)
+            elseif args[1] == '!perkhelp' then
+                local reply = "!elo: Checks the User's elo and IGN \n!elo [IGN]: Checks the elo and stats of the IGN included \n!bracket: Displays a list of the top 16 qualified people for the finals"
+                message:reply{embed={description = reply}}
+            elseif args[1] == '!marryme' then
+                message.channel:send("B-Baka... It's not like I l-like you or anything...")
             end
-        elseif args[1] == '!elo' then
-            local reply = message.channel:send('Checking Elo!')
-            CheckElo(message, args)
-            reply:delete()
-        elseif args[1] == '!bracket' then
-            CheckLeaderboard(message)
-        elseif table.find(args, "cringebot") or table.find(args, "Cringebot") then
-            message:reply("no, you're cringe " .. message.author.username)
-        elseif args[1] == '!perkhelp' then
-            local reply = "!elo: Checks the User's elo and IGN \n!elo [IGN]: Checks the elo and stats of the IGN included \n!bracket: Displays a list of the top 16 qualified people for the finals"
-            message:reply{embed={description = reply}}
-        elseif args[1] == '!marryme' then
-            message.channel:send("B-Baka... It's not like I l-like you or anything...")
         end
     end
 end)
