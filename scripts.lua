@@ -1,6 +1,5 @@
 --some things i've just stolen from google over the days, no idea where from.
 local discordia = require("discordia")
-local json = require("json")
 local util = {}
 util.tprint = function (tbl, indent)
     if not indent then indent = 0 end
