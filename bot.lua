@@ -20,7 +20,7 @@ local logChannel
 local GameOptions = {"Adding titan shifting", "Messing with perk's math", "Attack On Quest", "Bullying Ewan", "Practicing chop skims", "Crying in a corner", "Trashing Timmys", "Watching Quest Taker", "Watching Calactic", "Super jumping", "Searching for fuel in Shiganshina", "Taking a water break", "Summoning boss titans in 1v1s", "Unlocking the lobby in a 1v1", "On US server", "Hanging out with Perk", "🅱️erk", "Killing Jim’s lackies", "Requesting titan shifting", "Requesting colossal titan", "Requesting PVP", "Arguing with Dyno", "Having an existential crisis", "Breaking Mako’s code", "Error 404 message not found", "!Perkhelp", "Losing my small amount of remaining sanity", "Listening to hopes and dreams by Toby Fox", "Help help get me out", "I’m not a bot please I’m trapped", "I’m being held here against my will", "Doing Perk’s math homework", "Don’t dm me for modmail", "Waiting for my next update"}
 local function setGame()
 	client:setGame(GameOptions[math.random(#GameOptions)])
-    local guild = client:getGuild("808112859372060672")
+    local guild = client:getGuild("808112859372060672") --TODO Change to AOQ discord
     guild.me:setNickname(nil)
 end
 
@@ -34,6 +34,7 @@ end)
 
 client:on('ready', function()
 	print('Logged in as '.. client.user.username)
+    logChannel = client:getGuild("540633273110364161"):getChannel("857450532423073812")
     GetSpreadsheet()
     setGame()
 end)
@@ -54,6 +55,8 @@ client:on('messageCreate', function(message)
                 elseif args[1] == '!perkhelp' then
                     local reply = "!elo: Checks the User's elo and IGN \n!elo [IGN]: Checks the elo and stats of the IGN included \n!bracket: Displays a list of the top 16 qualified people for the finals"
                     message:reply{embed={description = reply}}
+                elseif args[1] == '!buttontest' then
+                    
                 end
             --Update elo command, admin only and limited to specific channel
             elseif message.channel.id == "814918813346168893" then
@@ -75,7 +78,6 @@ client:on('messageCreate', function(message)
         end
     end)
     if not success then
-        logChannel = client:getGuild("540633273110364161"):getChannel("857450532423073812")
         util.logError(logChannel, err)
     end
 end)
@@ -172,51 +174,47 @@ end
 --Allows for admins to easily complete a match via a command instead of manually updating the spreadsheet
 function CompleteMatch(message, args)
     GetSpreadsheet()
-    local player1 = message.mentionedUsers.first or args[2]
-    local player2 = message.mentionedUsers.last or args[3]
-    local authorID = message.author.id
+    local memberServer = client:getGuild("540633273110364161") --TODO: Change to AOQ server
+    local player1 = message.mentionedUsers.first or memberServer:getMember(args[2]).user
+    local player2 = message.mentionedUsers.last or memberServer:getMember(args[3]).user
     if player1 and player2 then
-        local reply = message:reply("Please @ the winner or post their UID.")
         local winningplayer
         local lostplayer
+        local reply = message:reply{
+            content = "Please @ the winner or post their UID.",
+            components = {{type = 1,components = {
+                {type = 2, style = 1, label = player1.name, custom_id = "player_1", disabled = false},
+                {type = 2, style = 1, label = player2.name, custom_id = "player_2", disabled = false}
+            }}}}
         --Wait for response of either @ or UID
-        client:waitFor("messageCreate", 20000, function(message)
-            if message.author.id == authorID then
+        client:waitFor("buttonPressed", 20000, function(buttonid, member)
+            print(member)
+            if message.author.id == member.user.id then
                 --if mentioned is nil, it'll always be player 1
-                local mentioned = "e"
-                local args = message.content:lower():split(" ")
-                --have to check if it's a ping first
-                if message.mentionedUsers.first then
-                    mentioned = message.mentionedUsers.first.id
-                    --print(mentioned)
-                end
-                if mentioned == player1.id or args[1] == player1 then
-                    --print("player1")
-                    winningplayer = player1.id or player1
-                    lostplayer = player2.id or player2
-                elseif mentioned == player2.id or args[1] == player2 then
-                   --print("player2")
-                    winningplayer = player2.id or player2
-                    lostplayer = player1.id or player1
+                if buttonid == "player_1" then
+                    winningplayer = player1.id
+                    lostplayer = player2.id
+                elseif buttonid == "player_2" then
+                    winningplayer = player2.id
+                    lostplayer = player1.id
                 end
                 message:delete()
                 return true
             end
           end)
+        --Wait for response of either @ or UID
         if winningplayer ~= nil then
             --print("WP:" .. tostring(winningplayer))
             local winrow = GetNotation(winningplayer)
             local lossrow = GetNotation(lostplayer)
             local p1diff, p2diff = CalculateEloDiff(winningplayer,lostplayer)
-            logChannel = client:getGuild("540633273110364161"):getChannel("857450532423073812")
-            local memberServer = client:getGuild("540633273110364161") --TODO: Change to AOQ server
             local winner = "Winner: ".. memberServer:getMember(winningplayer).user.tag .. " UID:" .. winningplayer
             local loser = "Loser: ".. memberServer:getMember(lostplayer).user.tag .. " UID:" .. lostplayer
             local err = winner.." Elo Diff:"..p1diff.."\n"..loser.." Elo Diff:"..p2diff
 
             WriteDataToSheet(winrow, p1diff, true)
             WriteDataToSheet(lossrow, p2diff, false)
-            reply:setContent("Winner Elo Diff:".. p1diff.."\nLoser Elo Diff:".. p2diff.."\nPlease verify this is correct in the sheet!")
+            reply:update({content = winner.. " Elo Diff:".. p1diff.."\n" .. loser..  " Elo Diff:".. p2diff.."\nPlease verify this is correct in the sheet!"})
             util.logMatch(logChannel, err, message)
         else
             reply:setContent("Error: Ping ID does not match either player or the command timed out! Please try again.")
