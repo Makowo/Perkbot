@@ -13,6 +13,11 @@ util.tprint = function (tbl, indent)
       end
     end
   end
+--i constantly forget which i need to do so...
+function log(...)
+  print(...)
+end
+
 function table.find(t,value)
     if t and type(t)=="table" and value then
         for _, v in ipairs (t) do
@@ -24,14 +29,14 @@ function table.find(t,value)
     end
     return false;
 end
- util.get_key_for_value= function( t, value )
-    for k,v in pairs(t) do
-      if v==value then return k end
-    end
-    return nil
+util.get_key_for_value= function( t, value )
+  for k,v in pairs(t) do
+    if v==value then return k end
   end
-util.logError = function(logChannel, err)
-  return logChannel:send{
+  return nil
+end
+util.logError = function(err)
+  return discordia.storage.logChannel:send{
     content="<@109199911441965056>",
 		embed = {
 			title = "Bot errored!",
@@ -44,16 +49,16 @@ util.logError = function(logChannel, err)
 		}
 	}
 end
-util.logMatch = function(logChannel, err, message)
-  return logChannel:send{
+util.logMatch = function(err, message)
+  return discordia.storage.logChannel:send{
 		embed = {
 			title = "Match Complete!",
 			description = "```\n"..err.."```",
 			color = discordia.Color.fromHex("#008000").value,
 			timestamp = discordia.Date():toISO('T', 'Z'),
 			footer = {
-				text = "Done By: " .. message.author.tag,
-        icon_url = message.author.avatarURL
+				text = "Done By: " .. message.member.user.tag,
+        icon_url = message.member.user.avatarURL
 			}
 		}
 	}
