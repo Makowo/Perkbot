@@ -10,10 +10,16 @@ local elo = {
                 description = "Check another Player's elo",
                 type = slash.enums.optionType.string,
                 required = false
+            },
+            {
+                name = "card",
+                description = "Show this Player's stat card",
+                type = slash.enums.optionType.boolean,
+                required = false
             }
         },
         callback = function(ia, params, cmd)
-            local success, err = pcall(gen.CheckElo, ia, params.user)
+            local success, err = pcall(gen.CheckElo, ia, params)
             if not success then
                 ia:update("An error has occurred, The developer has been notified!", true)
                 util.logError(err)

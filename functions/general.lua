@@ -70,16 +70,21 @@ function self.CheckElo(message, args)
     self:GetSpreadsheet()
     if self.decode ~= nil then
         local validname = false
-        if args ~= nil then
+        if args.user ~= nil then
             --User is checking another player
             local is_ping
-            if args:find("<@!") then
-                is_ping = args:gsub("<@!", ""):gsub(">", "")
+            if args.user and args.user:find("<@!") then
+                is_ping = args.user:gsub("<@!", ""):gsub(">", "")
             end
             for k, _ in pairs(self.PlayerData) do
-                if self.PlayerData[k].namelower == args:lower() or is_ping and self.PlayerData[k].UID == is_ping then
+                if self.PlayerData[k].namelower == args.user:lower() or is_ping and self.PlayerData[k].UID == is_ping then
                     local send =  "Elo: ".. self.PlayerData[k].elo .."\nMatches Played: ".. self.PlayerData[k].mplayed .. "\nWin Percentage: " ..self.PlayerData[k].winloss
-                    message:reply{embeds={{fields = {{name = self.PlayerData[k].Name, value = send }}}}}
+                    local image
+                    --i'm incompetent so i uploaded the files to github and use the links.
+                    if args.card then
+                        image = {url = "https://raw.githubusercontent.com/Makowo/Perkbot/master/assets/".. self.PlayerData[k].namelower ..".png"}
+                    end
+                    message:reply{embeds={{fields = {{name = self.PlayerData[k].Name, value = send }},image = image or nil}}}
                     validname = true
                     break
                 end
