@@ -53,6 +53,7 @@ function self.SendElo(message)
         if message.member.user.id == "553931341402472464" or "109199911441965056" then
             local counter = 0
             local send = {embed={fields = {}}}
+            --for every 9, send a embed with those players, loop until all players have been sent.
             for k, _ in pairs(self.SortedData) do
                 counter = counter + 1
                 table.insert(send.embed.fields, {name = k .. ". ".. self.SortedData[k].Name, value = "Elo: ".. self.SortedData[k].elo .."\nMatches Played: ".. self.SortedData[k].mplayed .. "\nWin Percentage: " ..self.SortedData[k].winloss, inline = true})
@@ -70,41 +71,30 @@ function self.CheckElo(message, args)
     self:GetSpreadsheet()
     if self.decode ~= nil then
         local validname = false
-        if args.user ~= nil then
-            --User is checking another player
-            local is_ping
-            if args.user and args.user:find("<@!") then
-                is_ping = args.user:gsub("<@!", ""):gsub(">", "")
-            end
-            for k, _ in pairs(self.PlayerData) do
-                if self.PlayerData[k].namelower == args.user:lower() or is_ping and self.PlayerData[k].UID == is_ping then
-                    local send =  "Elo: ".. self.PlayerData[k].elo .."\nMatches Played: ".. self.PlayerData[k].mplayed .. "\nWin Percentage: " ..self.PlayerData[k].winloss
-                    local image
-                    --i'm incompetent so i uploaded the files to github and use the links.
-                    if args.card then
-                        image = {url = "https://raw.githubusercontent.com/Makowo/Perkbot/master/assets/".. self.PlayerData[k].namelower ..".png"}
-                    end
-                    message:reply{embeds={{fields = {{name = self.PlayerData[k].Name, value = send }},image = image or nil}}}
-                    validname = true
-                    break
+        local uid = message.member.user.id --set uid if there's no args
+        local user = args.user or "aaaaaaaaaaaaaaaaaaaaaaaa" -- don't want this to be nil, incase a name is nil for some reason.
+
+        if args.user and args.user:find("<@!") then
+            uid = args.user:gsub("<@!", ""):gsub(">", "") --if ping, set uid as pinged uid
+        end
+
+        for k, _ in pairs(self.PlayerData) do
+            if self.PlayerData[k].namelower == user:lower() or self.PlayerData[k].UID == uid then
+                local send =  "Elo: ".. self.PlayerData[k].elo .."\nMatches Played: ".. self.PlayerData[k].mplayed .. "\nWin Percentage: " ..self.PlayerData[k].winloss
+                local image
+                --i'm incompetent so i uploaded the files to github and use the links.
+                --also because slash commands don't support attachments afaik, pain
+                if args.card then
+                    image = {url = "https://raw.githubusercontent.com/Makowo/Perkbot/cards/currentseason/".. self.PlayerData[k].namelower ..".png"}
                 end
+                message:reply{embeds={{fields = {{name = self.PlayerData[k].Name, value = send }},image = image or nil}}}
+                validname = true
+                break
             end
-            if not validname then
-                message:reply("Name not found, make sure you are using their IGN!", true)
-            end
-        else
-            --User is checking self
-            for k, _ in pairs(self.PlayerData) do
-                if self.PlayerData[k].UID == message.member.user.id then
-                    local send =  "Elo: ".. self.PlayerData[k].elo .."\nMatches Played: ".. self.PlayerData[k].mplayed .. "\nWin Percentage: " ..self.PlayerData[k].winloss
-                    message:reply{embeds={{fields = {{name = self.PlayerData[k].Name, value = send }}}}}
-                    validname = true
-                    break
-                end
-            end
-            if not validname then
-                message:reply("UID not found! If you are part of the league, then yell (nicely) at AOQL Staff to add your UID.", true)
-            end
+        end
+
+        if not validname then
+            message:reply("Name not found, make sure you are using their IGN!", true)
         end
     end
 end
@@ -133,6 +123,7 @@ function self.CompleteMatch(ia, args)
     if player1 and player2 then
         local winningplayer
         local lostplayer
+        --Create the buttons to select winner.
         ia:reply{
             content = "Please select the winner.",
             components = {{type = 1,components = {
@@ -155,8 +146,8 @@ function self.CompleteMatch(ia, args)
           end)
         --Calculate elo diff and send sheet data
         if winningplayer ~= nil then
-            local winrow = self.GetNotation(winningplayer)
-            local lossrow = self.GetNotation(lostplayer)
+            local winrow = self.GetRow(winningplayer)
+            local lossrow = self.GetRow(lostplayer)
             local p1diff, p2diff = self.CalculateEloDiff(winningplayer,lostplayer)
             local winner = "Winner: ".. memberServer:getMember(winningplayer).user.tag .. " UID:" .. winningplayer
             local loser = "Loser: ".. memberServer:getMember(lostplayer).user.tag .. " UID:" .. lostplayer
@@ -214,7 +205,7 @@ function self.WriteDataToSheet(row, elodiff, winner)
     end)()
 end
 --Gets the row of the player based on UID, should probably rename this.
-function self.GetNotation(winner)
+function self.GetRow(winner)
     for k, _ in pairs(self.PlayerData) do
         if self.PlayerData[k].UID == winner then
             print(self.PlayerData[k].Name)
