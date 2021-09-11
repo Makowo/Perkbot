@@ -25,13 +25,15 @@ clock:on("min", function()
 end)
 
 client:on('slashCommandsReady', function()
+    local logChannel = "857450532423073812"
 	print('Logged in as '.. client.user.username)
     if devmode then
         guild = client:getGuild("540633273110364161")
     else
         guild = client:getGuild("808112859372060672")
+        logChannel = "882065076041961514"
     end
-    discordia.storage.logChannel = client:getGuild(guild):getChannel("857450532423073812")
+    discordia.storage.logChannel = client:getGuild(guild):getChannel(logChannel)
     discordia.storage.client = client
     gen:GetSpreadsheet()
     gen:LoadCommands()
