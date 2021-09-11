@@ -76,6 +76,8 @@ function self.CheckElo(message, args)
 
         if args.user and args.user:find("<@!") then
             uid = args.user:gsub("<@!", ""):gsub(">", "") --if ping, set uid as pinged uid
+        else
+            uid = args.user or uid
         end
 
         for k, _ in pairs(self.PlayerData) do

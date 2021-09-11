@@ -31,7 +31,7 @@ client:on('slashCommandsReady', function()
     else
         guild = client:getGuild("808112859372060672")
     end
-    discordia.storage.logChannel = client:getGuild("540633273110364161"):getChannel("857450532423073812")
+    discordia.storage.logChannel = client:getGuild(guild):getChannel("857450532423073812")
     discordia.storage.client = client
     gen:GetSpreadsheet()
     gen:LoadCommands()
