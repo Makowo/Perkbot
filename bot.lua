@@ -38,6 +38,9 @@ client:on('slashCommandsReady', function()
     gen:GetSpreadsheet()
     gen:LoadCommands()
     setGame()
+    for k, v in pairs(guild:getSlashCommands()) do
+        v:delete()
+    end
     local success, err = pcall(function(...)
         for _, v in pairs(gen.commands) do
             guild:slashCommand(v)

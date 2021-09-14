@@ -13,7 +13,7 @@ local elo = {
             },
             {
                 name = "card",
-                description = "Show this Player's stat card",
+                description = "Show this Player's stat card, the cards are not updated in real time.",
                 type = slash.enums.optionType.boolean,
                 required = false
             }
