@@ -118,7 +118,7 @@ end
 function self.CompleteMatch(ia, args)
     self.GetSpreadsheet()
     local client = discordia.storage.client
-    local memberServer = client:getGuild("540633273110364161") --TODO: Change to AOQ server
+    local memberServer = discordia.storage.guild --TODO: Change to AOQ server (probably fixed)
     local player1 = memberServer:getMember(args.player1:gsub("<@!", ""):gsub(">", ""))
     local player2 = memberServer:getMember(args.player2:gsub("<@!", ""):gsub(">", ""))
 
